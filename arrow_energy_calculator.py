@@ -1,58 +1,115 @@
-import tkinter as tk
-from tkinter import ttk
+import pyinputplus as pyip
 
 class ArrowEnergyCalculator():
-    """Calculates the foot-pounds of energy based on an arrows weight and speed."""
-    def __init__(self, root):
-        """Initiate."""
-        self.root = root
-        self.root.title("Arrow Energy Calculator")
-        self.root.geometry("300x300")
+    """Calculates the foot-pounds of energy based on an arrows weight and speed.
+    
+    Methods:
+        receive_user_input
+        calculate_energy_total_weight
+        calculate_energy_component_weight
 
-        self.display()
+    Examples:
+        arrow_energy = ArrowEnergyCalculator()
+        arrow_energy.receive_user_input()
+    """
+    def __init__(self):
+        pass
+
+        
+    def receive_user_input(self):
+        """Prompt the user on information about their arrows.
+        
+        Returns:
+            float: Energy of the users arrow in ft.-lbs.
+        """
+        know_weight = pyip.inputYesNo("Do you know the total weight of the arrow (yes/no)? "
+                                        "If not, you will be asked to provide component weights: ")
+        if know_weight == "yes":
+            # Ask the user for total arrow weight & arrow speed
+            self.arrow_weight = pyip.inputNum("Enter the arrow weight (grains): ")
+            self.arrow_speed = pyip.inputNum("Enter the arrow speed (feet per second): ")
+            arrow_energy = self.calculate_energy_total_weight(arrow_weight=self.arrow_weight,
+                                                                arrow_speed=self.arrow_speed)
+            
+        elif know_weight == "no":
+            # Ask the user for component weights & arrow speed
+            self.broadhead_weight = pyip.inputNum("Enter the broadhead weight (grains): ")
+            self.insert_weight = pyip.inputNum("Enter the insert weight (grains): ")
+            self.shaft_grains_per_inch = pyip.inputNum("Enter the broadhead shaft weight (grains): ")
+            self.shaft_length = pyip.inputNum("Enter the broadhead shaft weight (grains): ")
+            self.fletching_weight = pyip.inputNum("Enter the weight of 1 fletching: ")
+            self.number_fletchings = pyip.inputNum("Enter the number of fletchings: ")
+            self.arrow_wrap_weight = pyip.inputNum("Enter the weight of your arrow wrap, or leave blank if none: " ,
+                                                    blank=True)
+            self.nock_weight = pyip.inputNum("Enter the nock weight (grains): ")
+            self.arrow_speed = pyip.inputNum("Enter the arrow speed (feet per second): ")
+            arrow_energy = self.calculate_energy_component_weight(broadhead_weight=self.broadhead_weight,
+                                                                  insert_weight=self.insert_weight,
+                                                                  shaft_grains_per_inch=self.shaft_grains_per_inch,
+                                                                  shaft_length=self.shaft_length,
+                                                                  fletching_weight=self.fletching_weight,
+                                                                  number_fletchings=self.number_fletchings,
+                                                                  nock_weight=self.fletching_weight,
+                                                                  arrow_speed=self.arrow_speed,
+                                                                  arrow_wrap_weight=self.arrow_wrap_weight)
+            
+            return arrow_energy
+            
+
+    def calculate_energy_total_weight(self, arrow_weight:float, arrow_speed:float,
+                                    round_digits:int=2) -> float:
+        """Calculate the foot pounds of energy from an arrow using the full arrow
+        weight and arrow speed.
+        
+        Returns:
+            float: Energy of the arrow in ft.-lbs.
+        """
+
+        self.arrow_weight = arrow_weight
+        self.arrow_speed = arrow_speed
+        self.total_energy = round(arrow_weight * arrow_speed ** 2 / 450_800, round_digits)
+        print(f"\nArrow weight: {self.arrow_weight} grams\n"
+              f"Arrow speed: {self.arrow_speed} feet per second\n"
+              f"Energy: {self.total_energy} foot-pounds\n")
+        return self.total_energy
 
 
-    def display(self):
-        """Main page display."""
-        # "Arrow Weight" label.
-        self.arrow_weight_label = ttk.Label(root, text="Arrow Weight (Grains)")
-        self.arrow_weight_label.pack(pady=10)
+    def calculate_energy_component_weight(self, broadhead_weight:float, insert_weight:float,
+                                           shaft_grains_per_inch:float, shaft_length:float,
+                                           fletching_weight:float, number_fletchings:int,
+                                           nock_weight:float, arrow_speed:int,
+                                           arrow_wrap_weight:float=0, round_digits:int=2) -> float:
+        """Calculate the foot pounds of energy from an arrow using the weight &
+        quantity of all the components and arrow speed.
+        
+        Returns:
+            float: Energy of the arrow in ft.-lbs.
+        """
+        self.broadhead_weight = broadhead_weight
+        self.insert_weight = insert_weight
+        self.shaft_grains_per_inch = shaft_grains_per_inch
+        self.shaft_length = shaft_length
+        self.fletching_weight = fletching_weight
+        self.number_fletchings = number_fletchings
+        self.nock_weight = nock_weight
+        self.arrow_wrap_weight = arrow_wrap_weight
+        self.arrow_speed = arrow_speed
 
-        # "Arrow Weight" entry.
-        self.arrow_weight_entry = ttk.Entry(root)
-        self.arrow_weight_entry.pack(pady=10)
+        self.arrow_weight = (self.broadhead_weight + self.insert_weight +
+                            (self.shaft_grains_per_inch * self.shaft_length) +
+                            (self.fletching_weight * self.number_fletchings) +
+                            self.nock_weight + self.arrow_wrap_weight)
 
-        # "Arrow Speed" label.
-        self.arrow_speed_label = ttk.Label(root, text="Arrow Speed (Feet Per Second)")
-        self.arrow_speed_label.pack(pady=10)
-
-        # "Arrow Speed" entry.
-        self.arrow_speed_entry = ttk.Entry(root)
-        self.arrow_speed_entry.pack(pady=10)
-
-        # "Calculate Foot-Pounds" button.
-        self.calculate_foot_pounds_button = tk.Button(root, text="Calculate Foot-Pounds", command=self.foot_pounds_formula)
-        self.calculate_foot_pounds_button.pack(pady=10)
-
-        # "Foot-Pounds" label.
-        self.foot_pounds_label = ttk.Label(root, text="Foot-Pounds")
-        self.foot_pounds_label.pack(pady=10)
-
-
-    def foot_pounds_formula(self):
-        """Calculate the foot-pounds of energy."""
-        #foot-pounds=(grams*fps^2)/450240
-        try:
-            weight = float(self.arrow_weight_entry.get())
-            speed = float(self.arrow_speed_entry.get())
-            energy = (weight * (speed**2)) / 450240
-            self.foot_pounds_label.config(text=f"Foot-Pounds: {energy:.2f}")
-
-        except ValueError:
-            self.foot_pounds_label.config(text="Error: Enter a valid number")
+        print(f"\nArrow weight: {self.arrow_weight} grams\n"
+              f"Arrow speed: {self.arrow_speed} feet per second\n"
+              f"Energy: {self.total_energy} foot-pounds\n")
+        return self.total_energy
 
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = ArrowEnergyCalculator(root)
-    root.mainloop()
+
+
+    def check_lethality(self, energy):
+        #TODO
+        pass
+    
+
