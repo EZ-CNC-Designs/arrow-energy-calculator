@@ -1,6 +1,6 @@
 import pyinputplus as pyip
 
-class ArrowEnergyCalculator():
+class ArcheryPhysics():
     """Calculates the foot-pounds of energy based on an arrows weight and speed.
     
     Methods:
@@ -138,5 +138,3 @@ class ArrowEnergyCalculator():
             print("Elk, mule deer, large black bear, caribou: ~45–65 ft-lbs")
             print("Moose, bison, musk ox, large grizzly: 65+ ft-lbs")
             print()
-
-            
