@@ -7,11 +7,14 @@ class ArrowEnergyCalculator():
         receive_user_input
         calculate_energy_total_weight
         calculate_energy_component_weight
+        check_lethality
 
     Examples:
-        arrow_energy = ArrowEnergyCalculator()
-        arrow_energy.receive_user_input()
+        arrow_1 = ArrowEnergyCalculator()
+        energy = arrow_1.receive_user_input()
+        arrow1.check_lethality(energy)
     """
+
     def __init__(self):
         pass
 
@@ -31,16 +34,19 @@ class ArrowEnergyCalculator():
             arrow_energy = self.calculate_energy_total_weight(arrow_weight=self.arrow_weight,
                                                                 arrow_speed=self.arrow_speed)
             
+            return arrow_energy
+            
         elif know_weight == "no":
             # Ask the user for component weights & arrow speed
             self.broadhead_weight = pyip.inputNum("Enter the broadhead weight (grains): ")
             self.insert_weight = pyip.inputNum("Enter the insert weight (grains): ")
             self.shaft_grains_per_inch = pyip.inputNum("Enter the broadhead shaft weight (grains): ")
-            self.shaft_length = pyip.inputNum("Enter the broadhead shaft weight (grains): ")
-            self.fletching_weight = pyip.inputNum("Enter the weight of 1 fletching: ")
-            self.number_fletchings = pyip.inputNum("Enter the number of fletchings: ")
-            self.arrow_wrap_weight = pyip.inputNum("Enter the weight of your arrow wrap, or leave blank if none: " ,
-                                                    blank=True)
+            self.shaft_length = pyip.inputNum("Enter the broadhead shaft length (inches): ")
+            self.fletching_weight = pyip.inputNum("Enter the weight of 1 fletching: ", )
+            self.number_fletchings = pyip.inputInt("Enter the number of fletchings: ", min=3, max=4)
+            self.arrow_wrap_weight = pyip.inputNum("Enter the weight of your arrow wrap, or leave blank if none: ",
+                                                    blank=True) # Blank returns nothing
+            self.arrow_wrap_weight = 0 if self.arrow_wrap_weight == "" else self.arrow_wrap_weight
             self.nock_weight = pyip.inputNum("Enter the nock weight (grains): ")
             self.arrow_speed = pyip.inputNum("Enter the arrow speed (feet per second): ")
             arrow_energy = self.calculate_energy_component_weight(broadhead_weight=self.broadhead_weight,
@@ -49,7 +55,7 @@ class ArrowEnergyCalculator():
                                                                   shaft_length=self.shaft_length,
                                                                   fletching_weight=self.fletching_weight,
                                                                   number_fletchings=self.number_fletchings,
-                                                                  nock_weight=self.fletching_weight,
+                                                                  nock_weight=self.nock_weight,
                                                                   arrow_speed=self.arrow_speed,
                                                                   arrow_wrap_weight=self.arrow_wrap_weight)
             
@@ -67,8 +73,8 @@ class ArrowEnergyCalculator():
 
         self.arrow_weight = arrow_weight
         self.arrow_speed = arrow_speed
-        self.total_energy = round(arrow_weight * arrow_speed ** 2 / 450_800, round_digits)
-        print(f"\nArrow weight: {self.arrow_weight} grams\n"
+        self.total_energy = round(self.arrow_weight * self.arrow_speed ** 2 / 450_800, round_digits)
+        print(f"\nArrow weight: {self.arrow_weight} grains\n"
               f"Arrow speed: {self.arrow_speed} feet per second\n"
               f"Energy: {self.total_energy} foot-pounds\n")
         return self.total_energy
@@ -95,21 +101,42 @@ class ArrowEnergyCalculator():
         self.arrow_wrap_weight = arrow_wrap_weight
         self.arrow_speed = arrow_speed
 
+
         self.arrow_weight = (self.broadhead_weight + self.insert_weight +
                             (self.shaft_grains_per_inch * self.shaft_length) +
                             (self.fletching_weight * self.number_fletchings) +
                             self.nock_weight + self.arrow_wrap_weight)
+        
+        self.total_energy = round(self.arrow_weight * self.arrow_speed ** 2 / 450_800, round_digits)
 
-        print(f"\nArrow weight: {self.arrow_weight} grams\n"
+        print(f"\nArrow weight: {self.arrow_weight} grains\n"
               f"Arrow speed: {self.arrow_speed} feet per second\n"
               f"Energy: {self.total_energy} foot-pounds\n")
         return self.total_energy
 
 
+    def check_lethality(self, kinetic_energy:float, view_chart=False) -> None:
+        """Verify what species of animals can be lethally hunted based on an arrows kinetic energy."""
+        if kinetic_energy >= 65.0:
+                print("Your arrow has enough kinetic energy for Moose, bison, musk ox, or large grizzly.")
+        elif kinetic_energy >= 45.0:
+            print("Your arrow has enough kinetic energy for elk, mule deer, large black bear, or caribou.")
+        elif kinetic_energy >= 35.0:
+            print("Your arrow has enough kinetic energy for whitetail deer, antalope, black bear, or wild hogs.")
+        elif kinetic_energy >= 25.0:
+            print("Your arrow has enough kinetic energy for turkeys, coyotes, or javelinas.")
+        elif kinetic_energy >= 20.0:
+            print("Your arrow has enough kinetic energy for rabbits, squirrels, or birds.")
+        else:
+            print("Your arrow does not have enough kinetic energy for any game animals.")
 
+        if view_chart == True:
+            print()
+            print("Small game (rabbits, squirrels, birds): ~20–25 ft-lbs")
+            print("Medium game (turkeys, coyotes, javelina): ~25–35 ft-lbs")
+            print("Whitetail deer, antelope, black bear, wild hogs: ~35–45 ft-lbs")
+            print("Elk, mule deer, large black bear, caribou: ~45–65 ft-lbs")
+            print("Moose, bison, musk ox, large grizzly: 65+ ft-lbs")
+            print()
 
-    def check_lethality(self, energy):
-        #TODO
-        pass
-    
-
+            
